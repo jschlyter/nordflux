@@ -1,11 +1,13 @@
+SOURCE=	nordflux.py
+
 all: reformat lint
 	
 reformat:
-	isort nordflux
-	black nordflux
+	isort $(SOURCE)
+	black $(SOURCE)
 
 lint:
-	pylama nordflux
+	pylama $(SOURCE)
 
 build:
 	poetry build
