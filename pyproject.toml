@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nordflux"
 version = "0.1.0"
-description = "Nordpool to InfluxDB utility"
+description = "Nordpool to InfluxDB exporter"
 authors = ["Jakob Schlyter <jakob@kirei.se>"]
 
 [tool.poetry.dependencies]
