@@ -13,6 +13,8 @@ DEFAULT_CONF_FILENAME = "nordflux.json"
 AREAS = ["SE1", "SE2", "SE3", "SE4"]
 CURRENCY = "SEK"
 
+elspot.Prices.API_URL = "https://www.nordpoolgroup.com/api/marketdata/page/%i"
+
 
 class NordpoolSeriesHelper(SeriesHelper):
     class Meta:
