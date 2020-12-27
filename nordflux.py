@@ -2,6 +2,9 @@ import argparse
 import json
 import logging
 import math
+import time
+from datetime import date, timedelta
+from typing import Optional
 
 from influxdb import InfluxDBClient, SeriesHelper
 from nordpool import elspot
@@ -18,10 +21,10 @@ class NordpoolSeriesHelper(SeriesHelper):
         tags = ["area", "currency"]
 
 
-def nordflux(client) -> None:
+def nordflux(client, end_date: Optional[date] = None) -> None:
 
     spot = elspot.Prices(currency=CURRENCY)
-    data = spot.hourly(areas=AREAS)
+    data = spot.hourly(areas=AREAS, end_date=end_date)
     has_datapoints = False
 
     for area in AREAS:
@@ -40,6 +43,8 @@ def nordflux(client) -> None:
     if client is not None:
         if has_datapoints:
             NordpoolSeriesHelper.commit(client=client)
+        else:
+            logger.warning("No datapoints for %s", end_date)
     else:
         print(NordpoolSeriesHelper._json_body_())
 
@@ -54,6 +59,29 @@ def main() -> None:
         default=DEFAULT_CONF_FILENAME,
         metavar="filename",
         help="configuration file",
+        required=False,
+    )
+    parser.add_argument(
+        "--begin",
+        dest="begin_date",
+        metavar="date",
+        help="begin date",
+        required=False,
+    )
+    parser.add_argument(
+        "--end",
+        dest="end_date",
+        metavar="date",
+        help="End date",
+        required=False,
+    )
+    parser.add_argument(
+        "--wait",
+        dest="wait",
+        metavar="seconds",
+        help="Time to sleep between requests",
+        type=int,
+        default=0,
         required=False,
     )
     parser.add_argument("--test", dest="test", action="store_true", help="Test mode")
@@ -82,7 +110,24 @@ def main() -> None:
         else None
     )
 
-    nordflux(client=client)
+    begin_date = (
+        date.fromisoformat(args.begin_date)
+        if args.begin_date
+        else date.today() + timedelta(days=1)
+    )
+    end_date = (
+        date.fromisoformat(args.end_date)
+        if args.end_date
+        else date.today() + timedelta(days=1)
+    )
+
+    d = begin_date
+    while d <= end_date:
+        logging.debug("Processing %s", d)
+        nordflux(client=client, end_date=d)
+        d += timedelta(days=1)
+        if d < end_date:
+            time.sleep(args.wait)
 
 
 if __name__ == "__main__":
