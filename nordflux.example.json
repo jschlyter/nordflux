@@ -1,0 +1,6 @@
+{
+	"hostname": "hostname.example.com",
+	"database": "foo",
+	"username": "bar",
+	"password": "xyzzy"
+}
