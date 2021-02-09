@@ -12,6 +12,7 @@ from nordpool import elspot
 DEFAULT_CONF_FILENAME = "nordflux.json"
 AREAS = ["SE1", "SE2", "SE3", "SE4"]
 CURRENCY = "SEK"
+PAGE = 29
 
 elspot.Prices.API_URL = "https://www.nordpoolgroup.com/api/marketdata/page/%i"
 
@@ -26,7 +27,8 @@ class NordpoolSeriesHelper(SeriesHelper):
 def nordflux(client, end_date: Optional[date] = None) -> None:
 
     spot = elspot.Prices(currency=CURRENCY)
-    data = spot.hourly(areas=AREAS, end_date=end_date)
+    #data = spot.hourly(areas=AREAS, end_date=end_date)
+    data = spot.fetch(PAGE, areas=AREAS, end_date=end_date)
     has_datapoints = False
 
     for area in AREAS:
@@ -54,7 +56,7 @@ def nordflux(client, end_date: Optional[date] = None) -> None:
 def main() -> None:
     """Main function"""
 
-    parser = argparse.ArgumentParser(description="wapi2nsconf")
+    parser = argparse.ArgumentParser(description="nordflux")
     parser.add_argument(
         "--conf",
         dest="conf_filename",
