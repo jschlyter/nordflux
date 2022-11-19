@@ -48,7 +48,7 @@ def nordflux(client, end_date: Optional[date] = None) -> None:
         if has_datapoints:
             NordpoolSeriesHelper.commit(client=client)
         else:
-            logger.warning("No datapoints for %s", end_date)
+            logging.warning("No datapoints for %s", end_date)
     else:
         print(NordpoolSeriesHelper._json_body_())
 
