@@ -12,7 +12,7 @@ lint:
 build:
 	poetry build
 
-container: build
+container:
 	docker build -t nordflux .
 
 clean:
