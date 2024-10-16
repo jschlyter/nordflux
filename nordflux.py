@@ -12,7 +12,6 @@ from nordpool import elspot
 DEFAULT_CONF_FILENAME = "nordflux.json"
 AREAS = ["SE1", "SE2", "SE3", "SE4"]
 CURRENCY = "SEK"
-PAGE = 29
 
 
 class NordpoolSeriesHelper(SeriesHelper):
@@ -25,8 +24,12 @@ class NordpoolSeriesHelper(SeriesHelper):
 def nordflux(client, end_date: Optional[date] = None) -> None:
 
     spot = elspot.Prices(currency=CURRENCY)
-    #data = spot.hourly(areas=AREAS, end_date=end_date)
-    data = spot.fetch(PAGE, areas=AREAS, end_date=end_date)
+    try:
+        data = spot.hourly(areas=AREAS, end_date=end_date)
+    except json.JSONDecodeError:
+        logging.warning("No datapoints for %s", end_date)
+        return
+
     has_datapoints = False
 
     for area in AREAS:
