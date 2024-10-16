@@ -57,7 +57,7 @@ def nordflux(client, end_date: Optional[date] = None) -> None:
 def main() -> None:
     """Main function"""
 
-    parser = argparse.ArgumentParser(description="nordflux")
+    parser = argparse.ArgumentParser(description="Nordpool to InfluxDB exporter")
     parser.add_argument(
         "--conf",
         dest="conf_filename",
