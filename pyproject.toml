@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "nordflux"
-version = "0.1.1"
+version = "0.1.2"
 description = "Nordpool to InfluxDB exporter"
 authors = ["Jakob Schlyter <jakob@kirei.se>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-nordpool = "^0.3.0"
+python = ">=3.11,<3.13"
+nordpool = {git = "https://github.com/jschlyter/nordpool.git", rev = "currency_fix"}
+#nordpool = "^0.3.0"
 influxdb = "^5.3.1"
 
 [tool.poetry.dev-dependencies]
