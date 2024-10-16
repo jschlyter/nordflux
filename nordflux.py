@@ -30,6 +30,10 @@ def nordflux(client, end_date: Optional[date] = None) -> None:
         logging.warning("No datapoints for %s", end_date)
         return
 
+    if data is None:
+        logging.warning("No datapoints for %s", end_date)
+        return
+
     has_datapoints = False
 
     for area in AREAS:
