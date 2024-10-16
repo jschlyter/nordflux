@@ -6,8 +6,7 @@ authors = ["Jakob Schlyter <jakob@kirei.se>"]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-nordpool = {git = "https://github.com/jschlyter/nordpool.git", rev = "currency_fix"}
-#nordpool = "^0.3.0"
+nordpool = ">=0.4.2"
 influxdb = "^5.3.1"
 
 [tool.poetry.group.dev.dependencies]
