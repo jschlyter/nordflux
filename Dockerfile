@@ -1,7 +1,7 @@
 FROM python:3.12 AS builder
 RUN pip3 install poetry
 WORKDIR /tmp
-COPY pyproject.toml poetry.lock *.py /tmp/
+COPY pyproject.toml *.py /tmp/
 RUN poetry build
 
 FROM python:3.12
