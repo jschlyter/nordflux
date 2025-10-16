@@ -21,7 +21,6 @@ class NordpoolSeriesHelper(SeriesHelper):
 
 
 def nordflux(client, end_date: date | None = None) -> None:
-
     spot = elspot.Prices(currency=CURRENCY)
     try:
         data = spot.fetch(elspot.Prices.HOURLY, end_date=end_date, areas=AREAS)
