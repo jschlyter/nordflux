@@ -25,7 +25,7 @@ def nordflux(client, end_date: Optional[date] = None) -> None:
 
     spot = elspot.Prices(currency=CURRENCY)
     try:
-        data = spot.hourly(areas=AREAS, end_date=end_date)
+        data = spot.fetch(elspot.Prices.HOURLY, end_date=end_date, areas=AREAS)
     except json.JSONDecodeError:
         logging.warning("No datapoints for %s", end_date)
         return

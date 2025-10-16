@@ -1,25 +1,33 @@
-[tool.poetry]
+[project]
 name = "nordflux"
-version = "0.1.3"
+dynamic = ["version"]
 description = "Nordpool to InfluxDB exporter"
-authors = ["Jakob Schlyter <jakob@kirei.se>"]
+authors = [{name="Jakob Schlyter", email = "jakob@kirei.se"}]
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "influxdb>=5.3.2",
+    "nordpool>=0.5.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11,<3.13"
-nordpool = ">=0.4.2"
-influxdb = "^5.3.1"
+[dependency-groups]
+dev = [
+    "ruff>=0.9.9",
+    "pytest>=8.2.0",
+    "pytest-ruff>=0.4.1"
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.6.9"
-pytest = "^8.2.0"
-pytest-ruff = "^0.3.2"
+[project.urls]
+repository = "https://github.com/jschlyter/nordflux.git"
+
+[project.scripts]
+nordflux = "nordflux:main"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
 
-[tool.poetry.scripts]
-nordflux = "nordflux:main"
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
 
 [tool.ruff.lint]
 select = [
