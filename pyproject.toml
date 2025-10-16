@@ -6,7 +6,7 @@ authors = [{name="Jakob Schlyter", email = "jakob@kirei.se"}]
 requires-python = ">=3.13,<4.0"
 dependencies = [
     "influxdb>=5.3.2",
-    "nordpool>=0.5.0",
+    "pynordpool>=0.3.1",
 ]
 
 [dependency-groups]

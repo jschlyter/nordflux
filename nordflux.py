@@ -1,16 +1,18 @@
 import argparse
+import asyncio
+import datetime
 import json
 import logging
-import math
 import time
-from datetime import date, timedelta
 
+import aiohttp
 from influxdb import InfluxDBClient, SeriesHelper
-from nordpool import elspot
+from pynordpool import Currency, NordPoolClient
 
 DEFAULT_CONF_FILENAME = "nordflux.json"
 AREAS = ["SE1", "SE2", "SE3", "SE4"]
-CURRENCY = "SEK"
+
+CURRENCY = Currency.SEK
 
 
 class NordpoolSeriesHelper(SeriesHelper):
@@ -20,43 +22,49 @@ class NordpoolSeriesHelper(SeriesHelper):
         tags = ["area", "currency"]
 
 
-def nordflux(client, end_date: date | None = None) -> None:
-    spot = elspot.Prices(currency=CURRENCY)
-    try:
-        data = spot.fetch(elspot.Prices.HOURLY, end_date=end_date, areas=AREAS)
-    except json.JSONDecodeError:
-        logging.warning("No datapoints for %s", end_date)
-        return
+async def nordflux(
+    nordpool_client: NordPoolClient,
+    influx_client: InfluxDBClient | None,
+    start_date: datetime.date,
+) -> None:
+    """Fetch data from Nordpool and submit to InfluxDB"""
 
-    if data is None:
-        logging.warning("No datapoints for %s", end_date)
+    delivery_period_datetime = datetime.datetime.combine(
+        start_date,
+        datetime.time(hour=0),
+        tzinfo=datetime.UTC,
+    )
+
+    try:
+        delivery_period_data = await nordpool_client.async_get_delivery_period(
+            delivery_period_datetime, CURRENCY, AREAS
+        )
+    except json.JSONDecodeError:
+        logging.warning("No datapoints for %s", delivery_period_datetime)
         return
 
     has_datapoints = False
 
-    for area in AREAS:
-        for entry in data["areas"][area]["values"]:
-            cost = entry["value"]
-            if math.isinf(cost):
-                continue
+    for entry in delivery_period_data.entries:
+        for area in AREAS:
             NordpoolSeriesHelper(
-                time=entry["start"].isoformat(),
+                time=entry.start,
                 area=area,
-                currency=CURRENCY,
-                cost=cost,
+                currency=str(CURRENCY),
+                cost=entry.entry[area],
             )
             has_datapoints = True
 
-    if client is not None:
+    if influx_client is not None:
         if has_datapoints:
-            NordpoolSeriesHelper.commit(client=client)
+            NordpoolSeriesHelper.commit(client=influx_client)
         else:
-            logging.warning("No datapoints for %s", end_date)
+            logging.warning("No datapoints for %s", start_date)
     else:
         print(NordpoolSeriesHelper._json_body_())
 
 
-def main() -> None:
+async def async_main() -> None:
     """Main function"""
 
     parser = argparse.ArgumentParser(description="Nordpool to InfluxDB exporter")
@@ -103,7 +111,7 @@ def main() -> None:
     with open(args.conf_filename) as config_file:
         config = json.load(config_file)
 
-    client = (
+    influx_client = (
         InfluxDBClient(
             host=config["hostname"],
             port=config.get("port", 8086),
@@ -118,23 +126,35 @@ def main() -> None:
     )
 
     begin_date = (
-        date.fromisoformat(args.begin_date)
+        datetime.date.fromisoformat(args.begin_date)
         if args.begin_date
-        else date.today() + timedelta(days=1)
-    )
-    end_date = (
-        date.fromisoformat(args.end_date)
-        if args.end_date
-        else date.today() + timedelta(days=1)
+        else datetime.date.today() + datetime.timedelta(days=1)
     )
 
-    d = begin_date
-    while d <= end_date:
-        logging.debug("Processing %s", d)
-        nordflux(client=client, end_date=d)
-        d += timedelta(days=1)
-        if d < end_date:
-            time.sleep(args.wait)
+    end_date = (
+        datetime.date.fromisoformat(args.end_date)
+        if args.end_date
+        else datetime.date.today() + datetime.timedelta(days=1)
+    )
+
+    async with aiohttp.ClientSession() as session:
+        nordpool_client = NordPoolClient(session)
+
+        d = begin_date
+        while d <= end_date:
+            logging.debug("Processing %s", d)
+            await nordflux(
+                nordpool_client=nordpool_client,
+                influx_client=influx_client,
+                start_date=d,
+            )
+            d += datetime.timedelta(days=1)
+            if d < end_date:
+                time.sleep(args.wait)
+
+
+def main() -> None:
+    asyncio.run(async_main())
 
 
 if __name__ == "__main__":
