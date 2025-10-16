@@ -20,7 +20,7 @@ class NordpoolSeriesHelper(SeriesHelper):
         tags = ["area", "currency"]
 
 
-def nordflux(client, end_date: date|None = None) -> None:
+def nordflux(client, end_date: date | None = None) -> None:
 
     spot = elspot.Prices(currency=CURRENCY)
     try:
