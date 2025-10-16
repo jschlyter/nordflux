@@ -4,7 +4,6 @@ import logging
 import math
 import time
 from datetime import date, timedelta
-from typing import Optional
 
 from influxdb import InfluxDBClient, SeriesHelper
 from nordpool import elspot
@@ -21,11 +20,10 @@ class NordpoolSeriesHelper(SeriesHelper):
         tags = ["area", "currency"]
 
 
-def nordflux(client, end_date: Optional[date] = None) -> None:
-
+def nordflux(client, end_date: date | None = None) -> None:
     spot = elspot.Prices(currency=CURRENCY)
     try:
-        data = spot.hourly(areas=AREAS, end_date=end_date)
+        data = spot.fetch(elspot.Prices.HOURLY, end_date=end_date, areas=AREAS)
     except json.JSONDecodeError:
         logging.warning("No datapoints for %s", end_date)
         return
