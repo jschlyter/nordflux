@@ -3,14 +3,11 @@ SOURCE=	nordflux.py
 all: reformat lint
 	
 reformat:
-	isort $(SOURCE)
-	black $(SOURCE)
+	uv run ruff check --select I --fix
+	uv run ruff format
 
 lint:
-	pylama $(SOURCE)
-
-build:
-	poetry build
+	uv run ruff check $(SOURCE)
 
 container:
 	docker build -t nordflux .

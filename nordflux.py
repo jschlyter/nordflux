@@ -3,7 +3,6 @@ import asyncio
 import datetime
 import json
 import logging
-import time
 
 import aiohttp
 from influxdb import InfluxDBClient, SeriesHelper
@@ -99,7 +98,12 @@ async def async_main() -> None:
         default=0,
         required=False,
     )
-    parser.add_argument("--test", dest="test", action="store_true", help="Test mode")
+    parser.add_argument(
+        "--test",
+        dest="test",
+        action="store_true",
+        help="Test mode (do not write to InfluxDB)",
+    )
     parser.add_argument(
         "--debug", dest="debug", action="store_true", help="Print debug information"
     )
@@ -150,7 +154,7 @@ async def async_main() -> None:
             )
             d += datetime.timedelta(days=1)
             if d < end_date:
-                time.sleep(args.wait)
+                await asyncio.sleep(args.wait)
 
 
 def main() -> None:
